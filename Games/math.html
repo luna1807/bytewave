@@ -1,84 +1,208 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
-  <title>Breathing Simulator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Simple Math Game</title>
   <style>
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      flex-direction: column;
-      font-family: Arial, sans-serif;
-      /* GIF background */
-      background-image: url("{{ url_for('static', filename='C:\Sam\breathing.WEBP') }}");
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-      color: #333;
-    }
-
-    #circle {
-      width: 100px;
-      height: 100px;
-      background: #670744;
-      border-radius: 50%;
-      margin-bottom: 20px;
-      animation: breathe 8s infinite;
-    }
-
-    @keyframes breathe {
-      0%   { transform: scale(1); background: #42093b; }
-      25%  { transform: scale(1.5); background: #76246c; } /* inhale */
-      50%  { transform: scale(1.5); background: #e25dd3; } /* hold */
-      75%  { transform: scale(1); background: #e492da; }  /* exhale */
-      100% { transform: scale(1); background: #42093b; }
-    }
-
-    #text {
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-    }
-    #exit-btn {
-      padding: 10px 20px;
-      font-size: 16px;
-      background: #1e1818;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    #exit-btn:hover {
-      background: #161212;
-    }
+    :root{--bg:#ffffff;--card:#f9fafb;--accent:#2563eb;--muted:#6b7280;--success:#16a34a;--danger:#dc2626;--text:#111827}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Inter,system-ui,Arial;color:var(--text)}
+    .card{background:var(--card);width:420px;border-radius:12px;padding:20px;box-shadow:0 8px 20px rgba(0,0,0,0.08)}
+    h1{margin:0 0 8px;font-size:20px}
+    .meta{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    .badge{background:#f3f4f6;padding:6px 10px;border-radius:8px;font-size:13px;color:var(--muted)}
+    .question{font-size:28px;font-weight:600;margin:22px 0;text-align:center}
+    .controls{display:flex;gap:8px;justify-content:center;margin-bottom:12px}
+    input[type=number]{padding:10px 12px;border-radius:8px;border:1px solid #d1d5db;background:transparent;color:inherit;width:140px;text-align:center;font-size:16px}
+    button{padding:10px 14px;border-radius:8px;border:none;background:var(--accent);color:#fff;font-weight:700;cursor:pointer}
+    button.secondary{background:#f9fafb;border:1px solid #d1d5db;color:var(--muted);font-weight:600}
+    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:14px;color:var(--muted)}
+    .message{height:20px;text-align:center;margin-top:6px;font-weight:600}
+    .small{font-size:13px;color:var(--muted)}
+    .top-row{display:flex;justify-content:space-between;align-items:center}
+    select{background:transparent;border-radius:8px;padding:6px 8px;border:1px solid #d1d5db;color:var(--muted)}
   </style>
 </head>
 <body>
-  <h1>Mini Breathing Simulator</h1>
-  <div id="circle"></div>
-  <div id="text">Inhale</div>
-  <button id="exit-btn" onclick="exitSimulator()">Exit</button>
-  <script>
-    const text = document.getElementById("text");
-    let step = 0;
-    const steps = ["Inhale", "Hold", "Exhale", "Hold"];
-    const interval = 2000; // Cuz 2 seconds per step
+  <div class="card">
+    <div class="top-row">
+      <h1>Quick Math — Practice Game</h1>
+      <div class="badge small">Points to win: <span id="targetPoints">10</span></div>
+    </div>
 
-    function updateText() {
-      text.innerText = steps[step % steps.length];
-      step++;
+    <div class="meta">
+      <div class="badge">Score: <strong id="score">0</strong></div>
+      <div class="badge">Time: <strong id="time">60</strong>s</div>
+      <div style="margin-left:auto" class="small">Mode: <select id="mode">
+        <option value="add">Addition</option>
+        <option value="sub">Subtraction</option>
+        <option value="mul">Multiplication</option>
+        <option value="mix" selected>Mixed</option>
+      </select></div>
+    </div>
+
+    <div class="question" id="question">Press Start to begin</div>
+
+    <div class="controls">
+      <input type="number" id="answer" placeholder="Your answer" autocomplete="off">
+      <button id="submitBtn">Check</button>
+      <button id="startBtn" class="secondary">Start</button>
+    </div>
+
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
+      <button id="skipBtn" class="secondary">Skip</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+    </div>
+
+    <div class="message" id="message"></div>
+
+    <div class="footer">
+      <div class="small">Difficulty: <select id="difficulty">
+        <option value="1">Easy</option>
+        <option value="2" selected>Medium</option>
+        <option value="3">Hard</option>
+      </select></div>
+      <div class="small">Target: <input type="number" id="target" value="10" style="width:60px;padding:6px;border-radius:6px;background:transparent;border:1px solid #d1d5db;color:var(--muted);text-align:center"></div>
+    </div>
+  </div>
+
+  <script>
+    const questionEl = document.getElementById('question');
+    const answerEl = document.getElementById('answer');
+    const scoreEl = document.getElementById('score');
+    const timeEl = document.getElementById('time');
+    const messageEl = document.getElementById('message');
+    const startBtn = document.getElementById('startBtn');
+    const submitBtn = document.getElementById('submitBtn');
+    const skipBtn = document.getElementById('skipBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const modeSel = document.getElementById('mode');
+    const diffSel = document.getElementById('difficulty');
+    const targetInput = document.getElementById('target');
+    const targetPointsEl = document.getElementById('targetPoints');
+
+    let currentAnswer = null;
+    let score = 0;
+    let timeLeft = 60;
+    let timerId = null;
+    let running = false;
+
+    function rand(min, max){ return Math.floor(Math.random()*(max-min+1))+min }
+
+    function genQuestion(){
+      const diff = Number(diffSel.value);
+      let a,b,op;
+      const mode = modeSel.value;
+      const rangeMap = {1:[1,10],2:[2,20],3:[5,50]};
+      const [minR,maxR] = rangeMap[diff] || [1,20];
+
+      if(mode === 'mix'){
+        const ops = ['add','sub','mul'];
+        op = ops[rand(0,ops.length-1)];
+      } else op = mode;
+
+      a = rand(minR,maxR);
+      b = rand(minR,maxR);
+
+      if(op === 'add'){
+        currentAnswer = a + b;
+        questionEl.textContent = `${a} + ${b} = ?`;
+      } else if(op === 'sub'){
+        if(b > a) [a,b] = [b,a];
+        currentAnswer = a - b;
+        questionEl.textContent = `${a} - ${b} = ?`;
+      } else if(op === 'mul'){
+        a = rand(Math.max(1,Math.floor(minR/2)), Math.min(maxR, Math.floor(maxR/2)));
+        b = rand(Math.max(1,Math.floor(minR/2)), Math.min(maxR, Math.floor(maxR/2)));
+        currentAnswer = a * b;
+        questionEl.textContent = `${a} × ${b} = ?`;
+      }
     }
-    //The text shld change acc to the animation
-    setInterval(updateText, interval);
-    function exitSimulator() {
-      window.location.href = "https://www.google.com";
+
+    function startGame(){
+      if(running) return;
+      running = true;
+      score = 0; scoreEl.textContent = score;
+      timeLeft = Number(timeEl.textContent) || 60;
+      timeEl.textContent = timeLeft;
+      targetPointsEl.textContent = targetInput.value || 10;
+      messageEl.textContent = '';
+      genQuestion();
+      answerEl.value = '';
+      answerEl.focus();
+
+      timerId = setInterval(()=>{
+        timeLeft--;
+        timeEl.textContent = timeLeft;
+        if(timeLeft <= 0) endGame(false);
+      },1000);
     }
+
+    function checkAnswer(){
+      if(!running) return messageEl.textContent = 'Press Start first!';
+      const val = answerEl.value.trim();
+      if(val === '') return messageEl.textContent = 'Type an answer!';
+      const num = Number(val);
+      if(Number.isNaN(num)) return messageEl.textContent = 'Enter a valid number';
+
+      if(num === currentAnswer){
+        score += 1;
+        scoreEl.textContent = score;
+        messageEl.style.color = '';
+        messageEl.textContent = 'Correct! +1';
+      } else {
+        messageEl.style.color = '';
+        messageEl.textContent = `Wrong — correct was ${currentAnswer}`;
+      }
+
+      answerEl.value = '';
+      genQuestion();
+
+      const target = Number(targetInput.value) || 10;
+      if(score >= target) endGame(true);
+    }
+
+    function skipQuestion(){
+      if(!running) return;
+      messageEl.textContent = `Skipped — answer was ${currentAnswer}`;
+      genQuestion();
+      answerEl.value = '';
+    }
+
+    function endGame(win){
+      clearInterval(timerId); timerId = null; running = false;
+      if(win){
+        messageEl.style.color = 'var(--success)';
+        messageEl.textContent = `You won! Score: ${score}`;
+      } else {
+        messageEl.style.color = 'var(--danger)';
+        messageEl.textContent = `Time's up — final score: ${score}`;
+      }
+      questionEl.textContent = 'Press Start to play again';
+    }
+
+    function resetGame(){
+      clearInterval(timerId); timerId = null; running = false;
+      score = 0; scoreEl.textContent = score;
+      timeLeft = 60; timeEl.textContent = timeLeft;
+      messageEl.textContent = '';
+      questionEl.textContent = 'Press Start to begin';
+      answerEl.value = '';
+    }
+
+    startBtn.addEventListener('click', ()=>{
+      const t = Number(timeEl.textContent) || 60;
+      timeLeft = t;
+      startGame();
+    });
+
+    submitBtn.addEventListener('click', checkAnswer);
+    answerEl.addEventListener('keydown', (e)=>{ if(e.key === 'Enter') checkAnswer(); });
+    skipBtn.addEventListener('click', skipQuestion);
+    resetBtn.addEventListener('click', resetGame);
+
+    targetInput.addEventListener('change', ()=>{ targetPointsEl.textContent = targetInput.value; });
   </script>
 </body>
 </html>
