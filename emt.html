@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mood Tracker Calendar</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      max-width: 700px;
+      margin: 20px auto;
+    }
+    .day {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 24px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+    .day:hover {
+      background: #eee;
+    }
+    form {
+      margin-top: 20px;
+    }
+    select, button {
+      padding: 8px 12px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌈 Mood Tracker Calendar</h1>
+
+  <div id="calendar" class="calendar"></div>
+
+  <form id="mood-form">
+    <label for="day">Day:</label>
+    <select id="day"></select>
+    
+    <label for="mood">Mood:</label>
+    <select id="mood">
+      <option value="😊">Happy</option>
+      <option value="😔">Sad</option>
+      <option value="😠">Angry</option>
+      <option value="😌">Calm</option>
+      <option value="🤩">Excited</option>
+    </select>
+    
+    <button type="submit">Add Mood</button>
+  </form>
+
+  <script>
+    const calendar = document.getElementById('calendar');
+    const daySelect = document.getElementById('day');
+    const moodForm = document.getElementById('mood-form');
+
+    const daysInMonth = 30; // simple 30-day calendar
+    let moods = {};
+
+    // Build calendar
+    for (let i = 1; i <= daysInMonth; i++) {
+      const day = document.createElement('div');
+      day.classList.add('day');
+      day.id = 'day-' + i;
+      day.innerText = i;
+      calendar.appendChild(day);
+
+      // Populate day dropdown
+      const option = document.createElement('option');
+      option.value = i;
+      option.text = i;
+      daySelect.appendChild(option);
+    }
+
+    // Handle mood submission
+    moodForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const day = daySelect.value;
+      const mood = document.getElementById('mood').value;
+
+      moods[day] = mood;
+      document.getElementById('day-' + day).innerText = day + ' ' + mood;
+    });
+  </script>
+</body>
+</html>

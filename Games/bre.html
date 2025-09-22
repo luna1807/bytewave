@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+  <title>Breathing Simulator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      /* Use relative path for background image */
+      background-image: url("static/breathing.webp"); /* Put breathing.webp in your Flask static folder */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+    }
+
+    #circle {
+      width: 100px;
+      height: 100px;
+      background: #670744;
+      border-radius: 50%;
+      margin-bottom: 20px;
+      animation: breathe 8s infinite;
+    }
+
+    @keyframes breathe {
+      0%   { transform: scale(1); background: #42093b; }
+      25%  { transform: scale(1.5); background: #76246c; } /* inhale */
+      50%  { transform: scale(1.5); background: #e25dd3; } /* hold */
+      75%  { transform: scale(1); background: #e492da; }  /* exhale */
+      100% { transform: scale(1); background: #42093b; }
+    }
+
+    #text {
+      font-size: 24px;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+      margin-bottom: 20px;
+    }
+
+    #exit-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #1e1818;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #exit-btn:hover {
+      background: #161212;
+    }
+  </style>
+</head>
+<body>
+  <h1>Mini Breathing Simulator</h1>
+  <div id="circle"></div>
+  <div id="text">Inhale</div>
+  <button id="exit-btn" onclick="exitSimulator()">Exit</button>
+
+  <script>
+    const text = document.getElementById("text");
+    let step = 0;
+    const steps = ["Inhale", "Hold", "Exhale", "Hold"];
+    const interval = 2000; // 2 seconds per step
+
+    function updateText() {
+      text.innerText = steps[step % steps.length];
+      step++;
+    }
+
+    // Start the breathing text updates
+    setInterval(updateText, interval);
+
+    function exitSimulator() {
+      window.location.href = "index.html"; // Change to your main page
+    }
+  </script>
+</body>
+</html>
